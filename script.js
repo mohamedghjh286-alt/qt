@@ -1,4 +1,6 @@
-// script.js — منطق العد التنازلي وإرسال بيانات التفعيل إلى البوت
+// script.js — عداد تنازلي تلقائي (10 ثوانٍ) يبدأ فور فتح الصفحة.
+// بعد انتهاء العد مباشرة، يُرسل تأكيد التفعيل للبوت تلقائيًا عبر Telegram.WebApp.sendData()
+// ثم تُغلق الصفحة نفسها - بدون أي حاجة لضغط المستخدم على أي زر.
 
 (function () {
   "use strict";
@@ -21,8 +23,6 @@
 
   const timerNumberEl = document.getElementById("timerNumber");
   const timerRingEl = document.getElementById("timerRing");
-  const backButton = document.getElementById("backButton");
-  const backButtonText = document.getElementById("backButtonText");
   const hintText = document.getElementById("hintText");
 
   let remaining = COUNTDOWN_SECONDS;
@@ -38,22 +38,16 @@
     updateRing(remaining);
 
     if (remaining <= 0) {
-      finishCountdown();
+      finishAndActivate();
       return;
     }
     remaining -= 1;
     setTimeout(tick, 1000);
   }
 
-  function finishCountdown() {
+  function finishAndActivate() {
     timerNumberEl.textContent = "✓";
-    hintText.textContent = "تم الانتهاء! اضغط الزر أدناه للعودة إلى البوت وتفعيل صلاحيتك.";
-    backButton.disabled = false;
-    backButtonText.textContent = "العودة إلى البوت";
-  }
-
-  backButton.addEventListener("click", function () {
-    if (backButton.disabled) return;
+    hintText.textContent = "✅ تم التفعيل! جاري الرجوع إلى تيليجرام...";
 
     const payload = {
       action: "free_activation_complete",
@@ -61,15 +55,18 @@
     };
 
     if (tg) {
+      // إرسال تلقائي بدون أي تدخل من المستخدم
       tg.sendData(JSON.stringify(payload));
-      tg.close();
+      setTimeout(function () {
+        tg.close();
+      }, 800);
     } else {
       // وضع اختبار خارج تيليجرام (متصفح عادي)
-      alert("تم التفعيل بنجاح (وضع الاختبار خارج تيليجرام).");
+      hintText.textContent = "✅ تم التفعيل (وضع الاختبار خارج تيليجرام).";
     }
-  });
+  }
 
-  // بدء العد التنازلي
+  // بدء العد التنازلي تلقائيًا فور تحميل الصفحة
   updateRing(remaining);
   tick();
 })();
