@@ -1,72 +1,168 @@
-// script.js — عداد تنازلي تلقائي (10 ثوانٍ) يبدأ فور فتح الصفحة.
-// بعد انتهاء العد مباشرة، يُرسل تأكيد التفعيل للبوت تلقائيًا عبر Telegram.WebApp.sendData()
-// ثم تُغلق الصفحة نفسها - بدون أي حاجة لضغط المستخدم على أي زر.
+// script.js
+// -----------
+// منطق Telegram Mini App لتفعيل الاستخدام المجاني (12 ساعة) مقابل مشاهدة
+// إعلان Rewarded حقيقي والتحقق من نجاحه على السيرفر.
+//
+// قواعد أمنية أساسية (لا تُخترق من هنا):
+// - لا يتم منح أي تفعيل إلا بعد استدعاء API السيرفر ونجاحه فعليًا.
+// - initData يُرسل للسيرفر مع كل طلب؛ السيرفر هو من يتحقق من التوقيع ويحدد
+//   هوية المستخدم الحقيقية (وليس أي قيمة من initDataUnsafe أو من الرابط).
+// - لا يوجد أي مؤقت محلي (setTimeout) يُستخدم كدليل على مشاهدة الإعلان.
 
 (function () {
   "use strict";
-
-  const COUNTDOWN_SECONDS = 10;
-  const RING_CIRCUMFERENCE = 339.29; // 2 * PI * r (r = 54)
 
   const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
 
   if (tg) {
     tg.ready();
     tg.expand();
-    // مواءمة الألوان مع ثيم تيليجرام الحالي (فاتح/داكن) تلقائيًا عبر متغيرات CSS
-    document.documentElement.style.setProperty("--tg-theme-bg-color", tg.themeParams.bg_color || "#0f1115");
-    document.documentElement.style.setProperty("--tg-theme-text-color", tg.themeParams.text_color || "#f2f2f2");
-    document.documentElement.style.setProperty("--tg-theme-hint-color", tg.themeParams.hint_color || "#9099a3");
-    document.documentElement.style.setProperty("--tg-theme-button-color", tg.themeParams.button_color || "#3ea6ff");
-    document.documentElement.style.setProperty("--tg-theme-button-text-color", tg.themeParams.button_text_color || "#ffffff");
   }
 
-  const timerNumberEl = document.getElementById("timerNumber");
-  const timerRingEl = document.getElementById("timerRing");
-  const hintText = document.getElementById("hintText");
+  const initData = tg ? tg.initData : "";
 
-  let remaining = COUNTDOWN_SECONDS;
+  // عناصر الشاشات
+  const screens = {
+    idle: document.getElementById("screenIdle"),
+    loading: document.getElementById("screenLoading"),
+    verifying: document.getElementById("screenVerifying"),
+    success: document.getElementById("screenSuccess"),
+    failed: document.getElementById("screenFailed"),
+  };
+  const watchBtn = document.getElementById("watchBtn");
+  const retryBtn = document.getElementById("retryBtn");
+  const closeBtn = document.getElementById("closeBtn");
+  const expiryText = document.getElementById("expiryText");
+  const failReason = document.getElementById("failReason");
 
-  function updateRing(secondsLeft) {
-    const fraction = secondsLeft / COUNTDOWN_SECONDS;
-    const offset = RING_CIRCUMFERENCE * (1 - fraction);
-    timerRingEl.style.strokeDashoffset = String(offset);
+  let currentSessionId = null;
+
+  function showScreen(name) {
+    Object.keys(screens).forEach((key) => {
+      screens[key].classList.toggle("hidden", key !== name);
+    });
   }
 
-  function tick() {
-    timerNumberEl.textContent = String(remaining);
-    updateRing(remaining);
+  function showFailed(reason) {
+    failReason.textContent = reason || "لم يتم تفعيل الـ12 ساعة لأن الإعلان لم يكتمل.";
+    showScreen("failed");
+  }
 
-    if (remaining <= 0) {
-      finishAndActivate();
+  async function apiPost(path, body) {
+    const resp = await fetch(API_URL + path, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    let data = {};
+    try {
+      data = await resp.json();
+    } catch (e) {
+      data = {};
+    }
+    return { ok: resp.ok, status: resp.status, data };
+  }
+
+  // ------------------------------------------------------------
+  // 1) إنشاء جلسة مكافأة جديدة (يتحقق السيرفر من initData هنا فعليًا)
+  // ------------------------------------------------------------
+  async function startSession() {
+    if (!initData) {
+      showFailed("تعذر التحقق من هويتك في تيليجرام. افتح هذه الصفحة من داخل البوت.");
+      watchBtn.disabled = true;
+      return false;
+    }
+    const { ok, data } = await apiPost("/api/session/start", { initData });
+    if (!ok || !data.session_id) {
+      showFailed("تعذر بدء الجلسة، حاول لاحقًا.");
+      return false;
+    }
+    currentSessionId = data.session_id;
+    return true;
+  }
+
+  // ------------------------------------------------------------
+  // 2) ضغط زر مشاهدة الإعلان
+  // ------------------------------------------------------------
+  async function onWatchClick() {
+    if (watchBtn.disabled) return;
+    watchBtn.disabled = true;
+
+    if (!currentSessionId) {
+      const ok = await startSession();
+      if (!ok) {
+        watchBtn.disabled = false;
+        return;
+      }
+    }
+
+    showScreen("loading");
+
+    if (typeof show_11571297 !== "function") {
+      showFailed("تعذر تحميل مكون الإعلانات. تأكد من اتصالك بالإنترنت وحاول مجددًا.");
       return;
     }
-    remaining -= 1;
-    setTimeout(tick, 1000);
+
+    show_11571297()
+      .then(() => {
+        // الإعلان اكتمل بنجاح فعليًا حسب شبكة الإعلانات - الآن فقط نطلب المكافأة
+        onAdCompleted();
+      })
+      .catch(() => {
+        // الإعلان لم يكتمل أو أُغلق أو حدث خطأ - لا نمنح أي مكافأة إطلاقًا
+        showFailed("لم تكتمل مشاهدة الإعلان. حاول مرة أخرى.");
+      });
   }
 
-  function finishAndActivate() {
-    timerNumberEl.textContent = "✓";
-    hintText.textContent = "✅ تم التفعيل! جاري الرجوع إلى تيليجرام...";
+  // ------------------------------------------------------------
+  // 3) بعد نجاح الإعلان فقط: إرسال طلب صرف المكافأة للسيرفر
+  // ------------------------------------------------------------
+  async function onAdCompleted() {
+    showScreen("verifying");
 
-    const payload = {
-      action: "free_activation_complete",
-      timestamp: Date.now(),
-    };
+    const { ok, status, data } = await apiPost("/api/ad-reward", {
+      initData,
+      reward_session_id: currentSessionId,
+    });
 
-    if (tg) {
-      // إرسال تلقائي بدون أي تدخل من المستخدم
-      tg.sendData(JSON.stringify(payload));
-      setTimeout(function () {
-        tg.close();
-      }, 800);
-    } else {
-      // وضع اختبار خارج تيليجرام (متصفح عادي)
-      hintText.textContent = "✅ تم التفعيل (وضع الاختبار خارج تيليجرام).";
+    if (ok && data.success) {
+      const dt = new Date(data.activated_until);
+      expiryText.textContent = dt.toLocaleString();
+      showScreen("success");
+      return;
     }
+
+    if (status === 409) {
+      showFailed("هذه الجلسة استُخدمت بالفعل أو انتهت صلاحيتها. اضغط إعادة المحاولة للحصول على جلسة جديدة.");
+      currentSessionId = null; // نجبر إنشاء جلسة جديدة عند إعادة المحاولة
+      return;
+    }
+
+    showFailed("حدث خطأ أثناء التفعيل على السيرفر. حاول مرة أخرى.");
   }
 
-  // بدء العد التنازلي تلقائيًا فور تحميل الصفحة
-  updateRing(remaining);
-  tick();
+  // ------------------------------------------------------------
+  // أزرار التحكم
+  // ------------------------------------------------------------
+  watchBtn.addEventListener("click", onWatchClick);
+
+  retryBtn.addEventListener("click", async () => {
+    showScreen("idle");
+    watchBtn.disabled = false;
+    if (!currentSessionId) {
+      await startSession();
+    }
+  });
+
+  closeBtn.addEventListener("click", () => {
+    if (tg) {
+      tg.close();
+    }
+  });
+
+  // ------------------------------------------------------------
+  // بدء التشغيل: إنشاء جلسة فور فتح الصفحة (بدون أي منح مكافأة بالطبع،
+  // فقط تجهيز الجلسة مسبقًا حتى يكون الضغط على زر المشاهدة أسرع)
+  // ------------------------------------------------------------
+  startSession();
 })();

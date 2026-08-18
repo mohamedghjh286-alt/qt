@@ -5,7 +5,6 @@
   --accent: var(--tg-theme-button-color, #3ea6ff);
   --accent-text: var(--tg-theme-button-text-color, #ffffff);
   --card: #1a1d24;
-  --ring-bg: #262a33;
 }
 
 * {
@@ -27,98 +26,113 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 24px 16px 16px;
-  max-width: 480px;
+  padding: 24px 20px 16px;
+  max-width: 420px;
   margin: 0 auto;
 }
 
 .app-header {
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: 32px;
 }
 
 .logo {
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 800;
   letter-spacing: 0.5px;
-  color: var(--text);
 }
 
 .logo span {
   color: var(--accent);
 }
 
-.subtitle {
-  color: var(--hint);
-  font-size: 14px;
-  margin-top: 4px;
-}
-
 .app-main {
   width: 100%;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.screen {
+  width: 100%;
+  text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 14px;
 }
 
-.timer-wrap {
-  position: relative;
-  width: 150px;
-  height: 150px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 8px;
+.screen.hidden {
+  display: none;
 }
 
-.timer-ring {
-  width: 100%;
-  height: 100%;
-  transform: rotate(-90deg);
+.icon {
+  font-size: 56px;
+  line-height: 1;
 }
 
-.timer-ring-bg {
-  fill: none;
-  stroke: var(--ring-bg);
-  stroke-width: 8;
+h1 {
+  font-size: 22px;
+  font-weight: 800;
 }
 
-.timer-ring-progress {
-  fill: none;
-  stroke: var(--accent);
-  stroke-width: 8;
-  stroke-linecap: round;
-  stroke-dasharray: 339.29;
-  stroke-dashoffset: 0;
-  transition: stroke-dashoffset 1s linear;
-}
-
-.timer-number {
-  position: absolute;
-  font-size: 40px;
-  font-weight: 700;
-  color: var(--text);
-}
-
-.hint {
-  text-align: center;
+.subtitle {
   color: var(--hint);
-  font-size: 13px;
-  line-height: 1.6;
-  max-width: 320px;
+  font-size: 14px;
+  line-height: 1.7;
 }
 
-.ad-slot {
+.expiry {
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--hint);
+  line-height: 1.8;
+}
+
+.expiry strong {
+  color: var(--text);
+  font-size: 15px;
+}
+
+.btn {
   width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 50px;
-  background: var(--card);
-  border-radius: 12px;
-  overflow: hidden;
-  padding: 8px;
+  padding: 14px 20px;
+  border: none;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 12px;
+  transition: opacity 0.2s ease, transform 0.15s ease;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn:not(:disabled):active {
+  transform: scale(0.97);
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: var(--accent-text);
+}
+
+.spinner {
+  width: 44px;
+  height: 44px;
+  border: 4px solid rgba(255, 255, 255, 0.15);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+  margin-bottom: 4px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 .app-footer {
