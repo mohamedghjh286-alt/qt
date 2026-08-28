@@ -3,63 +3,43 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Qt Installer - تفعيل مجاني</title>
+<title>Qt Installer - صفحة الإعلان</title>
 <link rel="stylesheet" href="style.css">
-
-<!-- Telegram WebApp SDK: يوفر initData الموثوق أمنيًا للتحقق من هوية المستخدم على السيرفر -->
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-<!-- Monetag Rewarded Ad SDK - يوفر الدالة العامة show_11571297() -->
-<!-- إذا كان Zone ID عندك مختلف، بدّل الرقم هنا وفي script.js -->
-<script src="//libtl.com/sdk.js" data-zone="11571297" data-sdk="show_11571297"></script>
 </head>
 <body>
+
+  <!-- Popunder Ad -->
+  <script src="https://pl29803499.effectivecpmnetwork.com/29/75/d4/2975d4821903bf0e219f9c1db479d063.js"></script>
 
   <div class="app">
 
     <header class="app-header">
       <div class="logo">Qt<span>Installer</span></div>
+      <p class="subtitle">شكرًا لدعمك عبر مشاهدة الإعلان</p>
     </header>
 
     <main class="app-main">
 
-      <!-- الحالة 1: الشاشة الرئيسية -->
-      <section id="screenIdle" class="screen">
-        <div class="icon">🎁</div>
-        <h1>تفعيل مجاني</h1>
-        <p class="subtitle">شاهد إعلانًا للحصول على<br><strong>12 ساعة</strong> من الاستخدام المجاني.</p>
-        <button id="watchBtn" class="btn btn-primary">▶️ مشاهدة الإعلان</button>
-      </section>
+      <!-- مساحة إعلانية 1: Banner 320x50 -->
+      <div class="ad-slot ad-banner" id="adBanner">
+        <script type="text/javascript">
+          atOptions = {
+            'key' : 'fc81e16a4944e7d285538116a1a35cb9',
+            'format' : 'iframe',
+            'height' : 50,
+            'width' : 320,
+            'params' : {}
+          };
+        </script>
+        <script src="https://www.highperformanceformat.com/fc81e16a4944e7d285538116a1a35cb9/invoke.js"></script>
+      </div>
 
-      <!-- الحالة 2: أثناء تشغيل الإعلان -->
-      <section id="screenLoading" class="screen hidden">
-        <div class="spinner"></div>
-        <p>⏳ جاري تشغيل الإعلان...</p>
-      </section>
+      <!-- مساحة إعلانية 2: Social Bar -->
+      <div class="ad-slot ad-social" id="adSocial">
+        <script src="https://pl30087110.effectivecpmnetwork.com/5b/ad/5d/5bad5d31b65e8fb591b62c84431245af.js"></script>
+      </div>
 
-      <!-- الحالة 3: نجح الإعلان، جاري التفعيل -->
-      <section id="screenVerifying" class="screen hidden">
-        <div class="spinner"></div>
-        <p>✅ تم الانتهاء من الإعلان</p>
-        <p>جاري تفعيل حسابك...</p>
-      </section>
-
-      <!-- الحالة 4: نجح التفعيل -->
-      <section id="screenSuccess" class="screen hidden">
-        <div class="icon">🎉</div>
-        <h1>تم التفعيل بنجاح</h1>
-        <p class="subtitle">تم تفعيل حسابك لمدة 12 ساعة.</p>
-        <p class="expiry">⏳ ينتهي التفعيل في:<br><strong id="expiryText">—</strong></p>
-        <button id="closeBtn" class="btn btn-primary">إغلاق</button>
-      </section>
-
-      <!-- الحالة 5: فشل (الإعلان لم يكتمل أو خطأ في السيرفر) -->
-      <section id="screenFailed" class="screen hidden">
-        <div class="icon">❌</div>
-        <h1>لم تكتمل العملية</h1>
-        <p class="subtitle" id="failReason">لم يتم تفعيل الـ12 ساعة لأن الإعلان لم يكتمل.</p>
-        <button id="retryBtn" class="btn btn-primary">🔄 المحاولة مرة أخرى</button>
-      </section>
+      <p class="hint">يمكنك الآن الرجوع إلى تيليجرام — سيتم تفعيل استخدامك المجاني تلقائيًا هناك خلال ثوانٍ.</p>
 
     </main>
 
@@ -69,7 +49,5 @@
 
   </div>
 
-  <script src="config.js"></script>
-  <script src="script.js"></script>
 </body>
 </html>
